@@ -1,9 +1,24 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 const SigninModal = () => {
+    const { login, openModal } = useAuth();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        try {
+            await login(email, password);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        }
+    };
+
     return (
         <div className="flex flex-col gap-1 w-full max-w-[500px] rounded-2xl shadow-sm overflow-hidden bg-gray-100 border-8 border-gray-100">
             {/* Top Section */}
@@ -49,15 +64,23 @@ const SigninModal = () => {
                 </p>
 
                 {/* Form */}
-                <div className="w-full mt-10 space-y-6 text-left">
+                <form onSubmit={handleSubmit} className="w-full mt-10 space-y-6 text-left">
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 animate-fade-in-up">
+                            {error}
+                        </div>
+                    )}
                     <div className="space-y-2">
                         <label className="text-[15px] font-bold text-gray-900 block">
-                            Email or username
+                            Email
                         </label>
                         <input
                             type="text"
-                            placeholder="Enter your email or username"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter your email"
                             className="w-full h-10 px-4 bg-gray-100 rounded-lg border-none focus:ring-0 focus:outline-none text-gray-900 placeholder:text-gray-400 text-sm font-medium"
+                            required
                         />
                     </div>
 
@@ -67,24 +90,30 @@ const SigninModal = () => {
                         </label>
                         <input
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
                             className="w-full h-10 px-4 bg-gray-100 rounded-lg border-none focus:ring-0 focus:outline-none text-gray-900 placeholder:text-gray-400 text-sm font-medium"
+                            required
                         />
                     </div>
 
                     <button className="w-full h-10 bg-[#545df3] hover:bg-[#4a53e0] transition-colors text-white rounded-lg font-bold text-sm mt-2">
                         Sign In
                     </button>
-                </div>
+                </form>
             </div>
 
             {/* Footer Section */}
             <div className="bg-gray-100 py-2 px-8 text-center">
                 <p className="text-[#6d6d6d] text-sm font-medium">
                     Do not have and account?{" "}
-                    <Link href="/signup" className="text-[#545df3] font-bold hover:underline">
+                    <button
+                        onClick={() => openModal('signup')}
+                        className="text-[#545df3] font-bold hover:underline"
+                    >
                         Sign Up
-                    </Link>
+                    </button>
                 </p>
             </div>
         </div>
